@@ -2,11 +2,14 @@ package com.studyProject.studyThymeleaf.controller;
 
 import com.studyProject.studyThymeleaf.model.Board;
 import com.studyProject.studyThymeleaf.repository.BoardRepository;
+import com.studyProject.studyThymeleaf.validator.BoardValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -15,6 +18,8 @@ public class BoardController {
 
     @Autowired
     private BoardRepository boardRepository;
+    @Autowired
+    private BoardValidator boardValidator;
 
     @GetMapping("/list")
     public String list(Model model){
@@ -36,18 +41,36 @@ public class BoardController {
 //    }
 
     @PostMapping("/form")
-    public String create(@ModelAttribute Board board){
+    public String create(@Valid Board board, BindingResult bindingResult){
+        boardValidator.validate(board, bindingResult);
+        if(bindingResult.hasErrors()){
+            return "board/form";
+        }
         boardRepository.save(board);
         return "redirect:/board/list";
     }
 
     @GetMapping("/post")
     public String post(Model model, @RequestParam(required = false) Long id){
-        System.out.println(id);
         Board board = boardRepository.findById(id).orElse(null);
         model.addAttribute("board",board);
         return "board/post";
     }
+    @PostMapping("/post")
+    public String modifyForm(Model model, @Valid Board board, @RequestParam(required = false) Long id, BindingResult bindingResult){
+        boardValidator.validate(board, bindingResult);
+        if(bindingResult.hasErrors()){
+            return "board/modify";
+        }
+        boardRepository.save(board);
+        model.addAttribute("board",board);
+        return "board/post";
+    }
 
-
+    @GetMapping("/modify")
+    public String modify(Model model, @RequestParam(required = false) Long id){
+        Board board = boardRepository.findById(id).orElse(null);
+        model.addAttribute("board", board);
+        return "board/modify";
+    }
 }

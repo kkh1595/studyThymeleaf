@@ -9,8 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
           integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <link href="starter-template.css" rel="stylesheet">
-
-    <title>게시판</title>
+    <title>글 수정</title>
 </head>
 
 <body>
@@ -18,29 +17,27 @@
 </nav>
 
 <div class="container">
-    <h1>게시판</h1>
-    <div>총 건수: <span th:text="${#lists.size(boards)}"></span>
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th scope="col">번호</th>
-                <th scope="col">제목</th>
-                <th scope="col">작성자</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="board:${boards}">
-                <th th:text="${board.id}">1</th>
-                <td><a th:text="${board.title}" th:href="@{/board/post(id=${board.id})}">mark</a></td>
-                <td>홍길동</td>
-            </tr>
-            </tbody>
-        </table>
-        <div class="text-right">
-            <a class="btn btn-primary" th:href='@{/board/form}'>글쓰기</a>
+    <h1>게시글</h1>
+    <form method="post" action="#" th:action="@{/board/post}" th:object="${board}">
+        <input type="hidden" th:field="${board.id}">
+        <div class="form-group">
+            <lable for="title">제목</lable>
+            <input type="text" id="title" class="form-control"
+                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" th:field="*{title}" placeholder="제목을 입력하세요">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">제목 에러 메시지</div>
         </div>
-    </div>
-</div>        
+        <div class="form-group">
+            <label for="content">내용</label>
+            <textarea class="form-control" id="content"
+                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'" th:field="*{content}" rows="3"></textarea>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">내용 에러 메시지</div>
+        </div>
+        <div class="text-right">
+            <a class="btn btn-danger" th:href="@{/board/list}">취소</a>
+            <button type="submit" class="btn btn-primary">수정완료</button>
+        </div>
+    </form>
+</div>
 
 <!-- jQuery, Popper.js, and Bootstrap JS -->
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -52,6 +49,5 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js"
         integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s"
         crossorigin="anonymous"></script>
-
 </body>
 </html>
