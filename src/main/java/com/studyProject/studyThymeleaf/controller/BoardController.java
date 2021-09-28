@@ -2,6 +2,7 @@ package com.studyProject.studyThymeleaf.controller;
 
 import com.studyProject.studyThymeleaf.model.Board;
 import com.studyProject.studyThymeleaf.repository.BoardRepository;
+import com.studyProject.studyThymeleaf.service.BoardService;
 import com.studyProject.studyThymeleaf.validator.BoardValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,12 +10,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -25,6 +28,8 @@ public class BoardController {
     private BoardRepository boardRepository;
     @Autowired
     private BoardValidator boardValidator;
+    @Autowired
+    private BoardService boardService;
 
     @GetMapping("/list")
     public String list(Model model,
@@ -56,23 +61,28 @@ public class BoardController {
 //    }
 
     @PostMapping("/form")
-    public String create(@Valid Board board, BindingResult bindingResult){
+    public String create(@Valid Board board, BindingResult bindingResult,Authentication authentication){
         boardValidator.validate(board, bindingResult);
         if(bindingResult.hasErrors()){
             return "board/form";
         }
-        boardRepository.save(board);
+        String username = authentication.getName();
+        boardService.save(username, board);
+//        boardRepository.save(board);
         return "redirect:/board/list";
     }
 
     @GetMapping("/post")
-    public String post(Model model, @RequestParam(required = false) Long id){
+    public String post(Model model, @RequestParam(required = false) Long id, Principal principal){
         Board board = boardRepository.findById(id).orElse(null);
+        String username = principal.getName();
         model.addAttribute("board",board);
+        model.addAttribute("username", username);
         return "board/post";
     }
     @PostMapping("/post")
-    public String modifyForm(Model model, @Valid Board board, @RequestParam(required = false) Long id, BindingResult bindingResult){
+    public String modifyForm(Model model, @Valid Board board, @RequestParam(required = false) Long id,
+                             BindingResult bindingResult){
         boardValidator.validate(board, bindingResult);
         if(bindingResult.hasErrors()){
             return "board/modify";
