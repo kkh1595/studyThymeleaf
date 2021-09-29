@@ -82,13 +82,15 @@ public class BoardController {
     }
     @PostMapping("/post")
     public String modifyForm(Model model, @Valid Board board, @RequestParam(required = false) Long id,
-                             BindingResult bindingResult){
+                             BindingResult bindingResult, Principal principal){
         boardValidator.validate(board, bindingResult);
         if(bindingResult.hasErrors()){
             return "board/modify";
         }
-        boardRepository.save(board);
+        String username = principal.getName();
+        boardService.save(username,board);
         model.addAttribute("board",board);
+        model.addAttribute("username", username);
         return "board/post";
     }
 
